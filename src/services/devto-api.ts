@@ -4,12 +4,12 @@ export class DevToApiService {
   private static readonly BASE_URL = 'https://dev.to/api';
 
   /**
-   * Extract article ID from dev.to URL
+   * Extract username and slug from dev.to URL
    * Supports formats:
-   * - https://dev.to/username/article-title-123
-   * - https://dev.to/username/article-title-123/comments
+   * - https://dev.to/username/article-slug
+   * - https://dev.to/username/article-slug/comments
    */
-  private extractArticleId(url: string): number | null {
+  private extractArticlePath(url: string): { username: string; slug: string } | null {
     try {
       const parsed = new URL(url);
       if (parsed.hostname !== 'dev.to') {
@@ -24,17 +24,15 @@ export class DevToApiService {
         return null;
       }
 
-      // Get the article slug (second part)
-      const articleSlug = pathParts[1];
+      const username = pathParts[0];
+      const slug = pathParts[1];
 
-      // Extract ID from the end of the slug (format: title-123)
-      const idMatch = articleSlug.match(/-(\d+)$/);
-
-      if (!idMatch) {
+      // Basic validation
+      if (!username || !slug) {
         return null;
       }
 
-      return parseInt(idMatch[1], 10);
+      return { username, slug };
     } catch {
       return null;
     }
@@ -44,21 +42,26 @@ export class DevToApiService {
    * Validate if URL is a dev.to article URL
    */
   public isValidDevToUrl(url: string): boolean {
-    return this.extractArticleId(url) !== null;
+    return this.extractArticlePath(url) !== null;
   }
 
   /**
-   * Fetch article data from dev.to API
+   * Fetch article data from dev.to API using username/slug path
    */
   public async fetchArticle(url: string): Promise<DevToArticle> {
-    const articleId = this.extractArticleId(url);
+    const pathInfo = this.extractArticlePath(url);
 
-    if (!articleId) {
+    if (!pathInfo) {
       throw new Error('Invalid dev.to URL format');
     }
 
     try {
-      const response = await fetch(`${DevToApiService.BASE_URL}/articles/${articleId}`);
+      const apiUrl = `${DevToApiService.BASE_URL}/articles/${pathInfo.username}/${pathInfo.slug}`;
+      const response = await fetch(apiUrl, {
+        headers: {
+          'User-Agent': 'Markdown Publisher Toolkit (verdent@codeck.ai)',
+        },
+      });
 
       if (!response.ok) {
         const errorData: DevToApiError = {

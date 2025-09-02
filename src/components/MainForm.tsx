@@ -47,13 +47,13 @@ export default function MainForm() {
           <TextField
             fullWidth
             label="dev.to Article URL"
-            placeholder="https://dev.to/username/article-title-123"
+            placeholder="https://dev.to/username/article-title"
             value={url}
             onChange={handleUrlChange}
             error={url.length > 0 && !validateUrl(url)}
             helperText={
               url.length > 0 && !validateUrl(url)
-                ? 'Please enter a valid dev.to URL with article ID'
+                ? 'Please enter a valid dev.to URL (e.g., https://dev.to/username/article-slug)'
                 : 'Paste the full URL of the dev.to article you want to convert'
             }
             sx={{ mb: 3 }}
