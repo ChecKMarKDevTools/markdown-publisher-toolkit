@@ -61,6 +61,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
+    "juice": "^11.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "rehype-sanitize": "^6.0.0",

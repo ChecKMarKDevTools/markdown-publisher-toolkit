@@ -1,6 +1,8 @@
 /**
  * Coder Legion HTML template generator
  */
+import { inlineCSSProcessor } from './inline-css-processor';
+
 export class CoderLegionHtmlGenerator {
   /**
    * Generate a complete HTML document optimized for Coder Legion
@@ -20,7 +22,7 @@ export class CoderLegionHtmlGenerator {
     // Process cover image URL with ?v=2 parameter
     const coverImageUrl = metadata.coverImage ? this.addVersionParam(metadata.coverImage) : '';
 
-    return `<!DOCTYPE html>
+    const htmlWithStyles = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -176,6 +178,9 @@ export class CoderLegionHtmlGenerator {
     </article>
 </body>
 </html>`;
+
+    // Convert CSS in <style> tags to inline styles for Coder Legion compatibility
+    return inlineCSSProcessor.inlineCSS(htmlWithStyles);
   }
 
   /**
