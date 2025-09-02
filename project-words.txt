@@ -1,0 +1,23 @@
+# tech words
+checkmarkdevtools
+Childress
+devto
+blockquotes
+Verdent
+coderlegion
+fseventsd
+icns
+timemachine
+donotpresent
+apdisk
+ionide
+Vuetify
+WCAG
+
+# tools
+vite
+vitest
+commitlint
+frontmatter
+lefthook
+wakatime
