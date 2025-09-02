@@ -35869,9 +35869,36 @@ class e_ {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
     <title>${this.escapeHtml(n)}</title>
     <meta name="description" content="${this.escapeHtml(o.description)}">
     <link rel="canonical" href="${o.canonicalUrl}">
+    
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "${this.escapeHtml(n)}",
+      "description": "${this.escapeHtml(o.description)}",
+      "author": {
+        "@type": "Person",
+        "name": "${this.escapeHtml(o.author)}"
+      },
+      "datePublished": "${o.publishedAt}",
+      "url": "${o.canonicalUrl}",
+      ${a ? `"image": "${a}",` : ''}
+      "publisher": {
+        "@type": "Organization",
+        "name": "Verdent Deck",
+        "url": "https://codeck.ai"
+      },
+      "keywords": "${o.tags.map((c) => this.escapeHtml(c)).join(', ')}",
+      "articleSection": "Technology",
+      "inLanguage": "en-US"
+    }
+    <\/script>
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
@@ -35983,36 +36010,86 @@ class e_ {
             color: #666;
             font-size: 0.9rem;
         }
+        
+        /* Accessibility enhancements */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: #000;
+            color: #fff;
+            padding: 8px;
+            text-decoration: none;
+            border-radius: 3px;
+            z-index: 1000;
+        }
+        
+        .skip-link:focus {
+            top: 6px;
+        }
+        
+        /* Focus styles for better accessibility */
+        a:focus,
+        button:focus {
+            outline: 2px solid #005fcc;
+            outline-offset: 2px;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            body {
+                background: #fff;
+                color: #000;
+            }
+            
+            .article-content blockquote {
+                border-left-color: #000;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 <body>
-    <article>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <article itemscope itemtype="https://schema.org/Article">
         <header class="article-header">
-            <h1 class="article-title">${this.escapeHtml(n)}</h1>
-            <div class="article-meta">
-                By <strong>${this.escapeHtml(o.author)}</strong> • 
-                Published on ${new Date(o.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            <h1 class="article-title" itemprop="headline">${this.escapeHtml(n)}</h1>
+            <div class="article-meta" role="contentinfo" aria-label="Article metadata">
+                By <strong itemprop="author" itemscope itemtype="https://schema.org/Person">
+                    <span itemprop="name">${this.escapeHtml(o.author)}</span>
+                </strong> • 
+                Published on <time itemprop="datePublished" datetime="${o.publishedAt}">
+                    ${new Date(o.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </time>
             </div>
-            ${a ? `<img src="${a}" alt="${this.escapeHtml(n)}" class="article-cover">` : ''}
+            ${a ? `<img src="${a}" alt="${this.escapeHtml(n)}" class="article-cover" itemprop="image" loading="lazy">` : ''}
         </header>
         
-        <div class="article-content">
+        <main class="article-content" itemprop="articleBody" role="main" id="main-content">
             ${r}
-        </div>
+        </main>
         
         ${
           o.tags.length > 0
             ? `
-        <div class="article-tags">
-            ${o.tags.map((c) => `<span class="tag">#${this.escapeHtml(c)}</span>`).join('')}
-        </div>
+        <aside class="article-tags" role="complementary" aria-label="Article tags">
+            ${o.tags.map((c) => `<span class="tag" itemprop="keywords">#${this.escapeHtml(c)}</span>`).join('')}
+        </aside>
         `
             : ''
         }
         
-        <footer class="article-footer">
-            <p>Originally published at <a href="${o.canonicalUrl}" target="_blank" rel="noopener">${o.canonicalUrl}</a></p>
-            <p><em>Converted by Verdent Deck</em> • <a href="mailto:verdent@codeck.ai">verdent@codeck.ai</a></p>
+        <footer class="article-footer" role="contentinfo" aria-label="Article attribution">
+            <p>Originally published at <a href="${o.canonicalUrl}" target="_blank" rel="noopener noreferrer" aria-label="View original article on dev.to (opens in new tab)">${o.canonicalUrl}</a></p>
+            <p><em>Converted by Verdent Deck</em> • <a href="mailto:verdent@codeck.ai" aria-label="Contact Verdent Deck">verdent@codeck.ai</a></p>
         </footer>
     </article>
 </body>

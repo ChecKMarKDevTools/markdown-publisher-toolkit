@@ -17,6 +17,12 @@ crossposted
 Segoe
 Neue
 noopener
+googlebot
+itemscope
+itemtype
+itemprop
+contentinfo
+noreferrer
 
 # tools
 vite
