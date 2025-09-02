@@ -13,6 +13,7 @@ apdisk
 ionide
 Vuetify
 WCAG
+crossposted
 
 # tools
 vite
