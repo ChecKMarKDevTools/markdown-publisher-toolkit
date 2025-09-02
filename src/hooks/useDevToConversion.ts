@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { devToApi } from '../services/devto-api';
+import { markdownProcessor } from '../services/markdown-processor';
 import type { DevToArticle, ConversionResult } from '../types/api';
 
 interface UseDevToConversionState {
@@ -39,21 +40,9 @@ export function useDevToConversion() {
         article,
       }));
 
-      // For now, create a basic conversion result
-      // The actual conversion logic will be implemented in Story 3
-      const result: ConversionResult = {
-        success: false,
-        error: 'Markdown conversion not yet implemented',
-        metadata: {
-          title: article.title,
-          description: article.description,
-          canonicalUrl: article.canonical_url || article.url,
-          coverImage: article.cover_image,
-          author: article.user.name,
-          publishedAt: article.published_at,
-          tags: article.tag_list,
-        },
-      };
+      // Convert markdown to HTML using the processor
+      const canonicalUrl = article.canonical_url || article.url;
+      const result = await markdownProcessor.convertArticle(article, canonicalUrl);
 
       setState((prev) => ({
         ...prev,
