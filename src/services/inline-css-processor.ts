@@ -192,13 +192,13 @@ export class InlineCSSProcessor {
       'gi',
     );
 
-    return html.replace(containerPattern, (match, openTag, content, closeTag) => {
+    return html.replace(containerPattern, (_match, openTag, content, closeTag) => {
       // Apply styles to target elements within this container
       const elementPattern = new RegExp(`(<${targetElement}[^>]*)(>)`, 'gi');
 
       const styledContent = content.replace(
         elementPattern,
-        (elementMatch: string, beforeClose: string, close: string) => {
+        (_elementMatch: string, beforeClose: string, close: string) => {
           const existingStyle = this.extractExistingStyle(beforeClose);
           const mergedStyle = this.mergeStyles(existingStyle, styleString);
 
