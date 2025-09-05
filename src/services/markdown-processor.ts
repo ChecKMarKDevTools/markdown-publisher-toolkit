@@ -34,7 +34,10 @@ export class MarkdownProcessor {
         coverImage: article.cover_image,
         author: article.user.name,
         publishedAt: article.published_at,
-        tags: article.tag_list,
+        tags: article.tag_list
+          .split(', ')
+          .map((tag) => tag.trim())
+          .filter((tag) => tag),
       };
 
       // Generate complete HTML document

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { FormEvent, ChangeEvent } from 'react';
 import {
   Paper,
   TextField,
@@ -14,19 +15,19 @@ import { Send as SendIcon, CheckCircle as CheckIcon } from '@mui/icons-material'
 import { useDevToConversion } from '../hooks/useDevToConversion';
 import OutputDisplay from './OutputDisplay';
 
-export default function MainForm() {
+const MainForm = () => {
   const [url, setUrl] = useState('');
   const { loading, error, article, result, validateUrl, convertArticle, reset } =
     useDevToConversion();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (validateUrl(url)) {
       await convertArticle(url);
     }
   };
 
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUrl(e.target.value);
     if (article || result || error) {
       reset();
@@ -95,9 +96,12 @@ export default function MainForm() {
                     {article.description}
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {article.tag_list.map((tag) => (
-                      <Chip key={tag} label={tag} size="small" variant="outlined" />
-                    ))}
+                    {article.tag_list
+                      .split(', ')
+                      .filter((tag) => tag.trim())
+                      .map((tag) => (
+                        <Chip key={tag} label={tag} size="small" variant="outlined" />
+                      ))}
                   </Box>
                 </Box>
               )}
@@ -106,14 +110,14 @@ export default function MainForm() {
 
           {/* Conversion result - failure case */}
           <Collapse in={!!result && !result.success}>
-            <Alert severity="warning" sx={{ mt: 2 }}>
+            <Alert severity="warning" sx={{ mt: 2 }} data-testid="conversion-result">
               <Typography>{result?.error || 'Conversion failed'}</Typography>
             </Alert>
           </Collapse>
 
           {/* Error state */}
           <Collapse in={!!error}>
-            <Alert severity="error" sx={{ mt: 2 }}>
+            <Alert severity="error" sx={{ mt: 2 }} data-testid="conversion-result">
               {error}
             </Alert>
           </Collapse>
@@ -121,7 +125,14 @@ export default function MainForm() {
       </Paper>
 
       {/* Success: Show converted output */}
+      {result?.success && (
+        <Alert severity="success" sx={{ mt: 2 }} data-testid="conversion-result">
+          <Typography>Conversion completed successfully!</Typography>
+        </Alert>
+      )}
       {result?.success && <OutputDisplay result={result} />}
     </Box>
   );
-}
+};
+
+export default MainForm;

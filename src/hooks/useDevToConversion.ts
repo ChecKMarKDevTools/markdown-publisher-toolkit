@@ -10,7 +10,7 @@ interface UseDevToConversionState {
   result: ConversionResult | null;
 }
 
-export function useDevToConversion() {
+export const useDevToConversion = () => {
   const [state, setState] = useState<UseDevToConversionState>({
     loading: false,
     error: null,
@@ -73,4 +73,4 @@ export function useDevToConversion() {
     convertArticle,
     reset,
   };
-}
+};

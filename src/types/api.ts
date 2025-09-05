@@ -16,6 +16,7 @@ export interface DevToArticle {
   crossposted_at: string | null;
   published_timestamp: string;
   reading_time_minutes: number;
+  published: boolean;
   user: {
     name: string;
     username: string;
@@ -33,7 +34,7 @@ export interface DevToArticle {
     profile_image_90: string;
   } | null;
   tags: string[];
-  tag_list: string[];
+  tag_list: string;
 }
 
 export interface DevToApiError {

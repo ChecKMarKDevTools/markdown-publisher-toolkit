@@ -1,24 +1,27 @@
-import { defineConfig, globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
 import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import react from 'eslint-plugin-react';
 import cspellPlugin from '@cspell/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
 
-export default defineConfig([
-  globalIgnores([
-    '**/dist/**',
-    '**/*.md',
-    '**/*.mmd',
-    '**/.env*',
-    '.gitignore',
-    'package.json',
-    'package-lock.json',
-    'frontend/coverage/**',
-    'frontend/playwright-report/**',
-    'frontend/test-results/**',
-  ]),
+export default [
+  {
+    ignores: [
+      '**/dist/**',
+      '**/*.md',
+      '**/*.mmd',
+      '**/.env*',
+      '.gitignore',
+      'package.json',
+      'package-lock.json',
+      'frontend/coverage/**',
+      'frontend/playwright-report/**',
+      'frontend/test-results/**',
+    ],
+  },
   js.configs.recommended,
   {
     languageOptions: {
@@ -27,17 +30,25 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/**/*.{js,jsx}'],
-    extends: [reactHooks.configs['recommended-latest'], reactRefresh.configs.vite],
-    plugins: {
-      react,
-    },
-    settings: {
-      react: {
-        version: 'detect',
+    files: ['*.js', 'scripts/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
       },
     },
+    plugins: {
+      '@cspell': cspellPlugin,
+    },
+    rules: {
+      '@cspell/spellchecker': ['warn', { autoFix: true }],
+      'no-warning-comments': ['error', { terms: ['eslint-disable'], location: 'anywhere' }],
+      'func-style': ['error', 'expression', { allowArrowFunctions: true }],
+    },
+  },
+  {
+    files: ['src/**/*.{jsx,tsx}'],
     languageOptions: {
+      parser: tsParser,
       globals: {
         ...globals.browser,
         ...globals.node,
@@ -48,24 +59,102 @@ export default defineConfig([
         sourceType: 'module',
       },
     },
+    plugins: {
+      react,
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+      '@cspell': cspellPlugin,
+      '@typescript-eslint': tsPlugin,
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
     rules: {
-      'no-unused-vars': [
+      ...reactHooks.configs['recommended-latest'].rules,
+      ...reactRefresh.configs.vite.rules,
+      'no-unused-vars': 'off', // Turn off base rule
+      '@typescript-eslint/no-unused-vars': [
         'error',
         {
           argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
-      'react/jsx-uses-react': 'off', // Not needed in React 17+
-      'react/jsx-uses-vars': 'error', // Detects JSX usage of variables
+      'react/jsx-uses-react': 'off', // With React 17+ and the new JSX Transform
+      'react/jsx-uses-vars': 'error', // enforces that variables used in JSX are properly recognized
+      'func-style': ['error', 'expression', { allowArrowFunctions: true }],
+      '@cspell/spellchecker': ['warn', { autoFix: true }],
+      'no-warning-comments': ['error', { terms: ['eslint-disable'], location: 'anywhere' }],
+    },
+  },
+  // Node.js JavaScript files in src (like convert.js)
+  {
+    files: ['src/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    plugins: {
+      '@cspell': cspellPlugin,
+    },
+    rules: {
+      '@cspell/spellchecker': ['warn', { autoFix: true }],
+      'no-warning-comments': ['error', { terms: ['eslint-disable'], location: 'anywhere' }],
+      'func-style': ['error', 'expression', { allowArrowFunctions: true }],
+    },
+  },
+  // TypeScript files in src (hooks, services, types)
+  {
+    files: ['src/**/*.ts'],
+    languageOptions: {
+      parser: tsParser,
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      '@cspell': cspellPlugin,
+      '@typescript-eslint': tsPlugin,
+    },
+    rules: {
+      'no-unused-vars': 'off', // Turn off base rule
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      '@cspell/spellchecker': ['warn', { autoFix: true }],
+      'no-warning-comments': ['error', { terms: ['eslint-disable'], location: 'anywhere' }],
+      'func-style': ['error', 'expression', { allowArrowFunctions: true }],
     },
   },
   {
-    files: ['src/__tests__/**/*', 'tests-e2e/**/*'],
+    files: ['test/**/*', 'src/__tests__/**/*', 'tests-e2e/**/*'],
     languageOptions: {
+      parser: tsParser,
       globals: {
         ...globals.vitest,
         global: 'writable',
       },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
     },
     rules: {
       'no-restricted-syntax': [
@@ -77,12 +166,8 @@ export default defineConfig([
         },
       ],
       // Allow unused vars in tests (helpers, parameter documentation, etc.).
-      'no-unused-vars': [
-        'off',
-        {
-          argsIgnorePattern: '^_',
-        },
-      ],
+      'no-unused-vars': 'off', // Turn off base rule
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
   {
@@ -99,15 +184,4 @@ export default defineConfig([
       'func-style': ['error', 'expression', { allowArrowFunctions: true }],
     },
   },
-  {
-    files: ['src/**/*.{js,jsx}', 'scripts/**/*.js'],
-    plugins: {
-      '@cspell': cspellPlugin,
-    },
-    rules: {
-      '@cspell/spellchecker': ['warn', { autoFix: true }],
-      'no-warning-comments': ['error', { terms: ['eslint-disable'], location: 'anywhere' }],
-      'func-style': ['error', 'expression', { allowArrowFunctions: true }],
-    },
-  },
-]);
+];

@@ -98,21 +98,15 @@ export class InlineCSSProcessor {
 
     // Apply styles to elements with classes
     for (const [selector, styles] of rules.entries()) {
-      if (selector.startsWith('.')) {
-        const className = selector.substring(1);
-        html = this.applyStylesToClass(html, className, styles);
-      } else if (selector.includes('.')) {
-        // Handle compound selectors like .article-content h1
+      // Check for nested selectors FIRST (contains space)
+      if (selector.includes(' ')) {
         const parts = selector.split(/\s+/);
-        const lastPart = parts[parts.length - 1];
-
-        if (lastPart.startsWith('.')) {
-          const className = lastPart.substring(1);
-          html = this.applyStylesToClass(html, className, styles);
-        } else if (parts.length > 1 && parts[0].startsWith('.')) {
-          // Apply to nested elements
+        if (parts.length === 2 && parts[0].startsWith('.')) {
           html = this.applyStylesToNestedElements(html, selector, styles);
         }
+      } else if (selector.startsWith('.')) {
+        const className = selector.substring(1);
+        html = this.applyStylesToClass(html, className, styles);
       }
     }
 
@@ -171,101 +165,52 @@ export class InlineCSSProcessor {
   }
 
   /**
-   * Apply styles to nested elements (basic implementation)
+   * Apply styles to nested elements with simplified approach
    */
   private applyStylesToNestedElements(
     html: string,
     selector: string,
     styles: Record<string, string>,
   ): string {
-    // This is a simplified implementation
-    // For a full CSS selector engine, we'd need a more sophisticated parser
-
     const styleString = this.objectToStyleString(styles);
     if (!styleString) return html;
 
-    // Handle simple cases like ".article-content h1"
-    if (selector.includes(' h1')) {
-      const tagRegex = /<h1([^>]*)>/gi;
-      html = html.replace(tagRegex, (_, attributes) => {
-        const existingStyle = this.extractExistingStyle(attributes);
-        const mergedStyle = this.mergeStyles(existingStyle, styleString);
+    // Parse the selector - only handle simple cases like ".parent element"
+    const parts = selector.trim().split(/\s+/);
+    if (parts.length !== 2) return html;
 
-        const cleanAttributes = attributes.replace(/style\s*=\s*["'][^"']*["']/gi, '').trim();
-        const separator = cleanAttributes ? ' ' : '';
+    const parentSelector = parts[0];
+    const targetElement = parts[1];
 
-        return `<h1${separator}${cleanAttributes} style="${mergedStyle}">`;
-      });
-    }
+    if (!parentSelector.startsWith('.')) return html;
+    const parentClass = parentSelector.substring(1);
 
-    // Similar for h2, h3, etc.
-    if (selector.includes(' h2')) {
-      const tagRegex = /<h2([^>]*)>/gi;
-      html = html.replace(tagRegex, (_, attributes) => {
-        const existingStyle = this.extractExistingStyle(attributes);
-        const mergedStyle = this.mergeStyles(existingStyle, styleString);
+    // Simple approach: find divs with the parent class, then style nested elements
+    // This is a simplified regex that handles most common cases
+    const containerPattern = new RegExp(
+      `(<div[^>]*class\\s*=\\s*["'][^"']*\\b${parentClass}\\b[^"']*["'][^>]*>)([\\s\\S]*?)(<\\/div>)`,
+      'gi',
+    );
 
-        const cleanAttributes = attributes.replace(/style\s*=\s*["'][^"']*["']/gi, '').trim();
-        const separator = cleanAttributes ? ' ' : '';
+    return html.replace(containerPattern, (match, openTag, content, closeTag) => {
+      // Apply styles to target elements within this container
+      const elementPattern = new RegExp(`(<${targetElement}[^>]*)(>)`, 'gi');
 
-        return `<h2${separator}${cleanAttributes} style="${mergedStyle}">`;
-      });
-    }
+      const styledContent = content.replace(
+        elementPattern,
+        (elementMatch: string, beforeClose: string, close: string) => {
+          const existingStyle = this.extractExistingStyle(beforeClose);
+          const mergedStyle = this.mergeStyles(existingStyle, styleString);
 
-    if (selector.includes(' h3')) {
-      const tagRegex = /<h3([^>]*)>/gi;
-      html = html.replace(tagRegex, (_, attributes) => {
-        const existingStyle = this.extractExistingStyle(attributes);
-        const mergedStyle = this.mergeStyles(existingStyle, styleString);
+          // Remove existing style attribute and add the merged one
+          const cleanAttributes = beforeClose.replace(/style\s*=\s*["'][^"']*["']/gi, '');
 
-        const cleanAttributes = attributes.replace(/style\s*=\s*["'][^"']*["']/gi, '').trim();
-        const separator = cleanAttributes ? ' ' : '';
+          return `${cleanAttributes} style="${mergedStyle}"${close}`;
+        },
+      );
 
-        return `<h3${separator}${cleanAttributes} style="${mergedStyle}">`;
-      });
-    }
-
-    // Handle other common selectors as needed
-    if (selector.includes(' blockquote')) {
-      const tagRegex = /<blockquote([^>]*)>/gi;
-      html = html.replace(tagRegex, (_, attributes) => {
-        const existingStyle = this.extractExistingStyle(attributes);
-        const mergedStyle = this.mergeStyles(existingStyle, styleString);
-
-        const cleanAttributes = attributes.replace(/style\s*=\s*["'][^"']*["']/gi, '').trim();
-        const separator = cleanAttributes ? ' ' : '';
-
-        return `<blockquote${separator}${cleanAttributes} style="${mergedStyle}">`;
-      });
-    }
-
-    if (selector.includes(' pre')) {
-      const tagRegex = /<pre([^>]*)>/gi;
-      html = html.replace(tagRegex, (_, attributes) => {
-        const existingStyle = this.extractExistingStyle(attributes);
-        const mergedStyle = this.mergeStyles(existingStyle, styleString);
-
-        const cleanAttributes = attributes.replace(/style\s*=\s*["'][^"']*["']/gi, '').trim();
-        const separator = cleanAttributes ? ' ' : '';
-
-        return `<pre${separator}${cleanAttributes} style="${mergedStyle}">`;
-      });
-    }
-
-    if (selector.includes(' code')) {
-      const tagRegex = /<code([^>]*)>/gi;
-      html = html.replace(tagRegex, (_, attributes) => {
-        const existingStyle = this.extractExistingStyle(attributes);
-        const mergedStyle = this.mergeStyles(existingStyle, styleString);
-
-        const cleanAttributes = attributes.replace(/style\s*=\s*["'][^"']*["']/gi, '').trim();
-        const separator = cleanAttributes ? ' ' : '';
-
-        return `<code${separator}${cleanAttributes} style="${mergedStyle}">`;
-      });
-    }
-
-    return html;
+      return openTag + styledContent + closeTag;
+    });
   }
 
   /**

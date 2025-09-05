@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { ReactNode, SyntheticEvent } from 'react';
 import { Paper, Typography, Box, Button, Tooltip, Tabs, Tab, Alert, Snackbar } from '@mui/material';
 import {
   ContentCopy as CopyIcon,
@@ -13,12 +14,12 @@ interface OutputDisplayProps {
 }
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   index: number;
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
+const TabPanel = (props: TabPanelProps) => {
   const { children, value, index, ...other } = props;
   return (
     <div
@@ -31,9 +32,9 @@ function TabPanel(props: TabPanelProps) {
       {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
     </div>
   );
-}
+};
 
-export default function OutputDisplay({ result }: OutputDisplayProps) {
+const OutputDisplay = ({ result }: OutputDisplayProps) => {
   const [tabValue, setTabValue] = useState(0);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -42,7 +43,7 @@ export default function OutputDisplay({ result }: OutputDisplayProps) {
     return null;
   }
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -51,7 +52,7 @@ export default function OutputDisplay({ result }: OutputDisplayProps) {
       await navigator.clipboard.writeText(result.html!);
       setSnackbarMessage('HTML copied to clipboard!');
       setSnackbarOpen(true);
-    } catch (err) {
+    } catch (_err) {
       setSnackbarMessage('Failed to copy HTML');
       setSnackbarOpen(true);
     }
@@ -70,7 +71,7 @@ export default function OutputDisplay({ result }: OutputDisplayProps) {
       URL.revokeObjectURL(url);
       setSnackbarMessage('HTML file downloaded!');
       setSnackbarOpen(true);
-    } catch (err) {
+    } catch (_err) {
       setSnackbarMessage('Failed to download HTML');
       setSnackbarOpen(true);
     }
@@ -196,4 +197,6 @@ export default function OutputDisplay({ result }: OutputDisplayProps) {
       />
     </Paper>
   );
-}
+};
+
+export default OutputDisplay;

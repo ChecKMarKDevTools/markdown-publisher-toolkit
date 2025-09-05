@@ -1,7 +1,7 @@
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import { Article as ArticleIcon } from '@mui/icons-material';
 
-export default function Header() {
+const Header = () => {
   return (
     <AppBar position="static" elevation={1}>
       <Toolbar>
@@ -15,4 +15,6 @@ export default function Header() {
       </Toolbar>
     </AppBar>
   );
-}
+};
+
+export default Header;
