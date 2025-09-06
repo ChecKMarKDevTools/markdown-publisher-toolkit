@@ -23,6 +23,7 @@ itemtype
 itemprop
 contentinfo
 noreferrer
+Polyform
 
 # tools
 vite
