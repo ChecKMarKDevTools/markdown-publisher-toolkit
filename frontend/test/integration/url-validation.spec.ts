@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('dev.to URL Validation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:3000');
   });
 
   test('accepts valid dev.to URLs', async ({ page }) => {

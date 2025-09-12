@@ -36,10 +36,12 @@ const mockArticleData = {
 
 test.describe('API Integration Tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock successful API responses
-    await page.route(
-      '**/dev.to/api/articles/augmentcode/auggie-cli-is-now-available-to-everyone-hkg',
-      async (route) => {
+    // Mock backend API responses instead of dev.to directly
+    await page.route('**/api/articles/fetch', async (route) => {
+      const requestBody = await route.request().postDataJSON();
+      const url = requestBody?.url;
+
+      if (url?.includes('augmentcode/auggie-cli-is-now-available-to-everyone-hkg')) {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -55,10 +57,60 @@ test.describe('API Integration Tests', () => {
             body_markdown: '# Auggie CLI\n\nGreat news! The CLI is now available.',
           }),
         });
-      },
-    );
+      } else if (url?.includes('ben/state-of-the-web-crawling-in-2024')) {
+        // Add delay for loading state test
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            ...mockArticleData,
+            id: 11111,
+            title: 'State of the Web Crawling in 2024',
+            user: {
+              ...mockArticleData.user,
+              name: 'Ben Halpern',
+              username: 'ben',
+            },
+          }),
+        });
+      } else if (url?.includes('nonexistent/article-that-does-not-exist')) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            message: 'Failed to fetch article',
+            details: 'Article not found',
+          }),
+        });
+      } else {
+        // For any other URLs, continue to backend
+        await route.continue();
+      }
+    });
 
-    await page.goto('/');
+    // Mock the convert API endpoint
+    await page.route('**/api/articles/convert', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          html: '<h1>Test Article</h1><p>Converted content</p>',
+          metadata: {
+            title: 'Test Article',
+            description: 'Test description',
+            canonicalUrl: 'https://dev.to/test/article',
+            coverImage: 'https://example.com/cover.jpg',
+            author: 'Test Author',
+            publishedAt: '2024-01-01',
+            tags: ['test'],
+          },
+        }),
+      });
+    });
+
+    await page.goto('http://localhost:3000');
   });
 
   test('successfully fetches a mocked dev.to article', async ({ page }) => {
@@ -78,18 +130,6 @@ test.describe('API Integration Tests', () => {
   });
 
   test('handles API errors gracefully', async ({ page }) => {
-    // Mock 404 error for non-existent article
-    await page.route(
-      '**/dev.to/api/articles/nonexistent/article-that-does-not-exist',
-      async (route) => {
-        await route.fulfill({
-          status: 404,
-          contentType: 'application/json',
-          body: JSON.stringify({ error: 'Not Found' }),
-        });
-      },
-    );
-
     const invalidUrl = 'https://dev.to/nonexistent/article-that-does-not-exist';
 
     await page.getByLabel('dev.to Article URL').fill(invalidUrl);
@@ -100,29 +140,6 @@ test.describe('API Integration Tests', () => {
   });
 
   test('shows loading state during conversion', async ({ page }) => {
-    // Add delay to mock response to test loading state
-    await page.route(
-      '**/dev.to/api/articles/ben/state-of-the-web-crawling-in-2024',
-      async (route) => {
-        // Add a small delay to see loading state
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            ...mockArticleData,
-            id: 11111,
-            title: 'State of the Web Crawling in 2024',
-            user: {
-              ...mockArticleData.user,
-              name: 'Ben Halpern',
-              username: 'ben',
-            },
-          }),
-        });
-      },
-    );
-
     const testUrl = 'https://dev.to/ben/state-of-the-web-crawling-in-2024';
 
     await page.getByLabel('dev.to Article URL').fill(testUrl);

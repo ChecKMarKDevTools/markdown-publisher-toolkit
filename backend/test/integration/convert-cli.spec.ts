@@ -5,6 +5,9 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
+// CLI path relative to backend directory
+const convertPath = process.env.CONVERT_CLI_PATH || 'dist/src/convert.js';
+
 test.describe('convert.js CLI', () => {
   const testMarkdownFile = 'test-temp.md';
   const testMarkdownContent = `# Test Article
@@ -34,7 +37,7 @@ console.log('Hello World');
   });
 
   test('should convert markdown file to HTML successfully', async () => {
-    const { stdout, stderr } = await execAsync(`node src/convert.js ${testMarkdownFile}`);
+    const { stdout, stderr } = await execAsync(`node ${convertPath} ${testMarkdownFile}`);
 
     expect(stderr).toBe('');
     expect(stdout).toContain('<h1>Test Article</h1>');
@@ -49,7 +52,7 @@ console.log('Hello World');
 
   test('should show usage message when no file provided', async () => {
     try {
-      await execAsync('node src/convert.js');
+      await execAsync(`node ${convertPath}`);
       throw new Error('Should have thrown an error');
     } catch (error: any) {
       expect(error.code).toBe(1);
@@ -60,7 +63,7 @@ console.log('Hello World');
 
   test('should handle non-existent file gracefully', async () => {
     try {
-      await execAsync('node src/convert.js non-existent-file.md');
+      await execAsync(`node ${convertPath} non-existent-file.md`);
       throw new Error('Should have thrown an error');
     } catch (error: any) {
       expect(error.code).toBe(1);
@@ -82,7 +85,7 @@ This is the main content after frontmatter.`;
     writeFileSync('test-frontmatter.md', frontmatterContent);
 
     try {
-      const { stdout, stderr } = await execAsync('node src/convert.js test-frontmatter.md');
+      const { stdout, stderr } = await execAsync(`node ${convertPath} test-frontmatter.md`);
 
       expect(stderr).toBe('');
       expect(stdout).not.toContain('title: CLI Test');
@@ -99,7 +102,7 @@ This is the main content after frontmatter.`;
     writeFileSync('test-empty.md', '');
 
     try {
-      const { stdout, stderr } = await execAsync('node src/convert.js test-empty.md');
+      const { stdout, stderr } = await execAsync(`node ${convertPath} test-empty.md`);
 
       expect(stderr).toBe('');
       expect(stdout).toBe('');

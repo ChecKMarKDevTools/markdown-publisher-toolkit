@@ -36,30 +36,40 @@ const mockArticleData = {
 
 test.describe('Full Conversion Flow', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock successful API response for all tests
-    await page.route(
-      '**/dev.to/api/articles/augmentcode/auggie-cli-is-now-available-to-everyone-hkg',
-      async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            ...mockArticleData,
-            id: 67890,
-            title: 'Auggie CLI is now available to everyone!',
-            user: {
-              ...mockArticleData.user,
-              name: 'AugmentCode',
-              username: 'augmentcode',
-            },
-            body_markdown:
-              '# Auggie CLI\n\nGreat news! The CLI is now available.\n\nThis is a test article with multiple paragraphs to test the conversion flow.',
-          }),
-        });
-      },
-    );
+    // Mock backend API fetch endpoint
+    await page.route('**/api/articles/fetch', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ...mockArticleData,
+          id: 67890,
+          title: 'Auggie CLI is now available to everyone!',
+          user: {
+            ...mockArticleData.user,
+            name: 'AugmentCode',
+            username: 'augmentcode',
+          },
+          body_markdown:
+            '# Auggie CLI\n\nGreat news! The CLI is now available.\n\nThis is a test article with multiple paragraphs to test the conversion flow.',
+        }),
+      });
+    });
 
-    await page.goto('/');
+    // Mock backend API convert endpoint
+    await page.route('**/api/articles/convert', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          html: '<h1>Auggie CLI</h1><p>Great news! The CLI is now available.</p><p>This is a test article with multiple paragraphs to test the conversion flow.</p>',
+          inlineCss:
+            '<h1 style="font-size: 2em;">Auggie CLI</h1><p>Great news! The CLI is now available.</p><p>This is a test article with multiple paragraphs to test the conversion flow.</p>',
+        }),
+      });
+    });
+
+    await page.goto('http://localhost:3000');
   });
 
   test('complete conversion flow with output display', async ({ page }) => {
@@ -104,7 +114,7 @@ test.describe('Full Conversion Flow', () => {
       await expect(page.getByRole('tab', { name: /html source/i })).toBeVisible();
     } else {
       // If conversion didn't succeed, at least ensure we got some result
-      await expect(conversionResult).toBeVisible();
+      await expect(conversionResult.first()).toBeVisible();
     }
   });
 

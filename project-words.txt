@@ -24,6 +24,7 @@ itemprop
 contentinfo
 noreferrer
 Polyform
+rebranded
 
 # tools
 vite

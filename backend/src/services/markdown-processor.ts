@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
-import { htmlGenerator } from './html-generator';
+import { htmlGenerator } from './html-generator.js';
 import type { DevToArticle, ConversionResult } from '../types/api';
 
 export class MarkdownProcessor {

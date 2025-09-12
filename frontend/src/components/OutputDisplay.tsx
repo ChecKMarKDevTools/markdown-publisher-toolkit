@@ -7,7 +7,7 @@ import {
   Visibility as PreviewIcon,
   Code as CodeIcon,
 } from '@mui/icons-material';
-import type { ConversionResult } from '../types/api';
+import type { ConversionResult } from '../services/backend-api';
 
 interface OutputDisplayProps {
   result: ConversionResult;

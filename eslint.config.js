@@ -20,6 +20,8 @@ export default [
       'frontend/coverage/**',
       'frontend/playwright-report/**',
       'frontend/test-results/**',
+      'backend/coverage/**',
+      'coverage/**',
     ],
   },
   js.configs.recommended,
@@ -46,7 +48,7 @@ export default [
     },
   },
   {
-    files: ['src/**/*.{jsx,tsx}'],
+    files: ['frontend/src/**/*.{jsx,tsx}'],
     languageOptions: {
       parser: tsParser,
       globals: {
@@ -90,9 +92,9 @@ export default [
       'no-warning-comments': ['error', { terms: ['eslint-disable'], location: 'anywhere' }],
     },
   },
-  // Node.js JavaScript files in src (like convert.js)
+  // Node.js JavaScript files in backend
   {
-    files: ['src/**/*.js'],
+    files: ['backend/src/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -107,9 +109,9 @@ export default [
       'func-style': ['error', 'expression', { allowArrowFunctions: true }],
     },
   },
-  // TypeScript files in src (hooks, services, types)
+  // TypeScript files in monorepo packages
   {
-    files: ['src/**/*.ts'],
+    files: ['frontend/src/**/*.ts', 'backend/src/**/*.ts'],
     languageOptions: {
       parser: tsParser,
       globals: {
@@ -141,7 +143,7 @@ export default [
     },
   },
   {
-    files: ['test/**/*', 'src/__tests__/**/*', 'tests-e2e/**/*'],
+    files: ['**/test/**/*', '**/src/__tests__/**/*', '**/tests-e2e/**/*'],
     languageOptions: {
       parser: tsParser,
       globals: {
@@ -179,7 +181,7 @@ export default [
     },
   },
   {
-    ignores: ['**/*.config.js', 'src/**/*', 'scripts/**/*'],
+    ignores: ['**/*.config.js', 'scripts/**/*'],
     rules: {
       'func-style': ['error', 'expression', { allowArrowFunctions: true }],
     },

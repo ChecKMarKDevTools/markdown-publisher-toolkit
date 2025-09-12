@@ -17,12 +17,12 @@ import rehypeStringify from 'rehype-stringify';
  * @param {string} markdown Raw markdown string
  * @returns {Promise<string>} HTML output
  */
-export const convertMarkdown = async (markdown) => {
+export const convertMarkdown = async (markdown: string): Promise<string> => {
   // Create a more permissive schema by merging with default
   const schema = {
     ...defaultSchema,
     tagNames: [
-      ...defaultSchema.tagNames,
+      ...(defaultSchema.tagNames || []),
       'p',
       'strong',
       'em',
@@ -55,7 +55,7 @@ export const convertMarkdown = async (markdown) => {
       ...defaultSchema.attributes,
       img: ['src', 'alt', 'title'],
       a: ['href', 'title'],
-      '*': defaultSchema.attributes['*'] || [],
+      '*': (defaultSchema.attributes && defaultSchema.attributes['*']) || [],
     },
   };
 

@@ -1,7 +1,7 @@
 /**
  * Coder Legion HTML template generator
  */
-import { inlineCSSProcessor } from './inline-css-processor';
+import { inlineCSSProcessor } from './inline-css-processor.js';
 
 export class CoderLegionHtmlGenerator {
   /**

@@ -26,12 +26,21 @@ pre-commit:
       run: |
         STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
         if [ -n "$STAGED_FILES" ]; then
-          if ! npx cspell --show-suggestions $STAGED_FILES; then
-            echo "❌ Spell check failed" >&2
+          echo "🔍 Running spell check on staged files..."
+          SPELL_OUTPUT=$(npx cspell --show-suggestions $STAGED_FILES 2>&1)
+          SPELL_STATUS=$?
+          echo "$SPELL_OUTPUT"
+          
+          if [ $SPELL_STATUS -ne 0 ]; then
+            echo ""
+            echo "❌ Spell check failed! Check the output above for specific errors."
+            echo "💡 Add unknown words to project-words.txt if they're valid technical terms."
             exit 1
+          else
+            echo "✅ Spell check passed!"
           fi
         fi
-      fail_text: 'Spell check failed'
+      fail_text: 'Spell check failed - see output above for details'
     test-coverage:
       run: |
         if ! npm run test:coverage; then

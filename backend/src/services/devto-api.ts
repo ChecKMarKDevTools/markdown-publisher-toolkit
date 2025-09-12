@@ -71,7 +71,7 @@ export class DevToApiService {
         throw new Error(errorData.error);
       }
 
-      const article: DevToArticle = await response.json();
+      const article = (await response.json()) as DevToArticle;
       return article;
     } catch (error) {
       if (error instanceof Error) {

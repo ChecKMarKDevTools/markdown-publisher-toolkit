@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: '/markdown-publisher-toolkit/',
+  base: mode === 'production' ? '/markdown-publisher-toolkit/' : '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -12,4 +12,4 @@ export default defineConfig({
     port: 3000,
     open: true,
   },
-});
+}));

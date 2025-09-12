@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
-import { devToApi } from '../services/devto-api';
-import { markdownProcessor } from '../services/markdown-processor';
-import type { DevToArticle, ConversionResult } from '../types/api';
+import { backendApi } from '../services/backend-api';
+import type { DevToArticle, ConversionResult } from '../services/backend-api';
 
 interface UseDevToConversionState {
   loading: boolean;
@@ -19,7 +18,7 @@ export const useDevToConversion = () => {
   });
 
   const validateUrl = useCallback((url: string): boolean => {
-    return devToApi.isValidDevToUrl(url);
+    return backendApi.isValidDevToUrl(url);
   }, []);
 
   const convertArticle = useCallback(async (url: string): Promise<void> => {
@@ -33,7 +32,7 @@ export const useDevToConversion = () => {
 
     try {
       // Fetch article from dev.to API
-      const article = await devToApi.fetchArticle(url);
+      const article = await backendApi.fetchArticle(url);
 
       setState((prev) => ({
         ...prev,
@@ -42,7 +41,7 @@ export const useDevToConversion = () => {
 
       // Convert markdown to HTML using the processor
       const canonicalUrl = article.canonical_url || article.url;
-      const result = await markdownProcessor.convertArticle(article, canonicalUrl);
+      const result = await backendApi.convertArticle(article, canonicalUrl);
 
       setState((prev) => ({
         ...prev,
